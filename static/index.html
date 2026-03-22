@@ -1,0 +1,2138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Intelligence — Advanced Sales Forecasting</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #09090e;
+      --s1: rgba(255, 255, 255, 0.02);
+      --s2: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --border2: rgba(255, 255, 255, 0.2);
+      --blue: #3b82f6;
+      --cyan: #22d3ee;
+      --green: #22c55e;
+      --orange: #f97316;
+      --yellow: #eab308;
+      --red: #ef4444;
+      --purple: #a855f7;
+      --text: #ffffff;
+      --muted: #94a3b8;
+      --muted2: #cbd5e1;
+      --fh: 'Cabinet Grotesk', sans-serif;
+      --fm: 'JetBrains Mono', monospace;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--fm);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    @keyframes pulse-bg {
+      0% {
+        background-position: 0% 50%;
+        opacity: 0.9;
+      }
+
+      50% {
+        background-position: 100% 50%;
+        opacity: 1;
+      }
+
+      100% {
+        background-position: 0% 50%;
+        opacity: 0.9;
+      }
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      /* HUGE BRIGHT NEON ORBS TO MAKE FROSTED GLASS POP */
+      background:
+        radial-gradient(circle 800px at 0% 10%, rgba(59, 130, 246, 0.45) 0%, transparent 60%),
+        radial-gradient(circle 800px at 100% 90%, rgba(168, 85, 247, 0.4) 0%, transparent 60%),
+        radial-gradient(circle 600px at 50% 50%, rgba(34, 211, 238, 0.2) 0%, transparent 80%);
+      background-size: 200% 200%;
+      pointer-events: none;
+      z-index: 0;
+      animation: pulse-bg 15s ease infinite;
+    }
+
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: var(--fh);
+      font-weight: 900;
+      font-size: 1.4rem;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -.02em;
+    }
+
+    .nav-pills {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pill {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: .7rem;
+      letter-spacing: .06em;
+      font-weight: 500;
+    }
+
+    .pill-blue {
+      background: rgba(59, 130, 246, .15);
+      color: var(--blue);
+      border: 1px solid rgba(59, 130, 246, .25);
+    }
+
+    .pill-green {
+      background: rgba(16, 185, 129, .15);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, .25);
+    }
+
+    .pill-orange {
+      background: rgba(249, 115, 22, .15);
+      color: var(--orange);
+      border: 1px solid rgba(249, 115, 22, .25);
+    }
+
+    .pill-purple {
+      background: rgba(139, 92, 246, .15);
+      color: var(--purple);
+      border: 1px solid rgba(139, 92, 246, .25);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 52px 0 36px;
+    }
+
+    .hero h1 {
+      font-family: var(--fh);
+      font-weight: 900;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 1;
+      letter-spacing: -.04em;
+      max-width: 780px;
+    }
+
+    .hero h1 .hl {
+      background: linear-gradient(90deg, var(--orange) 0%, var(--yellow) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      margin-top: 14px;
+      color: var(--muted2);
+      font-size: .88rem;
+      line-height: 1.7;
+      max-width: 560px;
+    }
+
+    /* ── FACTOR BADGES ── */
+    .factors-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 28px 0;
+    }
+
+    .factor-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--s2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: .78rem;
+      font-family: var(--fh);
+      font-weight: 600;
+      transition: border-color .2s;
+    }
+
+    .factor-badge:hover {
+      border-color: var(--border2);
+      filter: brightness(1.1);
+    }
+
+    .factor-icon {
+      font-size: 1.1rem;
+    }
+
+    /* ── CONTROL PANEL ── */
+    .ctrl-panel {
+      background: var(--s2);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 28px 32px 32px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ctrl-panel::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan), var(--green), var(--orange));
+    }
+
+    .ctrl-title {
+      font-family: var(--fh);
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .ctrl-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr auto;
+      gap: 14px;
+      align-items: end;
+    }
+
+    @media(max-width:900px) {
+      .ctrl-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .go-btn {
+        grid-column: 1/-1;
+      }
+    }
+
+    .fld label {
+      display: block;
+      font-size: .67rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    .fld input,
+    .fld select {
+      width: 100%;
+      background: var(--s1);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      padding: 11px 13px;
+      color: var(--text);
+      font-family: var(--fm);
+      font-size: .88rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .fld input:focus,
+    .fld select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, .12);
+    }
+
+    .fld input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(.5);
+      cursor: pointer;
+    }
+
+    .go-btn {
+      background: linear-gradient(135deg, #60a5fa, var(--blue), #2563eb);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      border-radius: 9px;
+      padding: 11px 26px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      font-family: var(--fh);
+      font-weight: 800;
+      font-size: .95rem;
+      cursor: pointer;
+      letter-spacing: .02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .go-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(59, 130, 246, .35);
+    }
+
+    .go-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ── LOADING ── */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 90px 0;
+    }
+
+    .loading.on {
+      display: block;
+    }
+
+    .lds {
+      width: 44px;
+      height: 44px;
+      border: 3px solid var(--border2);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+      margin: 0 auto 18px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading p {
+      color: var(--muted2);
+      font-size: .82rem;
+    }
+
+    .loading .steps {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .loading .step {
+      font-size: .72rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .step-dot.blue {
+      background: var(--blue);
+      animation: pulse 1.2s infinite;
+    }
+
+    .step-dot.green {
+      background: var(--green);
+      animation: pulse 1.2s .3s infinite;
+    }
+
+    .step-dot.orange {
+      background: var(--orange);
+      animation: pulse 1.2s .6s infinite;
+    }
+
+    .step-dot.purple {
+      background: var(--purple);
+      animation: pulse 1.2s .9s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: .3;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    /* ── ERROR ── */
+    .err {
+      display: none;
+      background: rgba(239, 68, 68, .1);
+      border: 1px solid rgba(239, 68, 68, .25);
+      border-radius: 10px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      margin-bottom: 20px;
+      font-size: .88rem;
+    }
+
+    .err.on {
+      display: block;
+    }
+
+    /* ── RESULTS ── */
+    #results {
+      display: none;
+    }
+
+    #results.on {
+      display: block;
+      animation: rise .45s ease;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── SECTION TITLE ── */
+    .sec-title {
+      font-family: var(--fh);
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── STAT GRID ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .stat {
+      background: var(--s1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 18px 20px;
+      transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: default;
+    }
+
+    .stat:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border-color: var(--border2);
+      background: var(--s2);
+    }
+
+
+
+    .stat-lbl {
+      font-size: .63rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-val {
+      font-family: var(--fh);
+      font-size: 1.65rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .stat-hint {
+      font-size: .68rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .c-blue {
+      color: var(--blue);
+    }
+
+    .c-green {
+      color: var(--green);
+    }
+
+    .c-orange {
+      color: var(--orange);
+    }
+
+    .c-yellow {
+      color: var(--yellow);
+    }
+
+    .c-cyan {
+      color: var(--cyan);
+    }
+
+    .c-purple {
+      color: var(--purple);
+    }
+
+    /* ── CHART CARD ── */
+    .cc {
+      background: var(--s2);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 24px 26px;
+      margin-bottom: 24px;
+    }
+
+    .cc-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .cc-title {
+      font-family: var(--fh);
+      font-size: .97rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .cc-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .cc-sub {
+      font-size: .7rem;
+      color: var(--muted);
+    }
+
+    .chart-h {
+      position: relative;
+      height: 300px;
+    }
+
+    .chart-h.tall {
+      height: 360px;
+    }
+
+    /* ── FACTOR INSIGHTS ── */
+    .factor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .fi-card {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+
+    .fi-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .fi-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .fi-icon.ev {
+      background: rgba(249, 115, 22, .15);
+    }
+
+    .fi-icon.wx {
+      background: rgba(6, 182, 212, .15);
+    }
+
+    .fi-icon.ds {
+      background: rgba(139, 92, 246, .15);
+    }
+
+    .fi-icon.cn {
+      background: rgba(16, 185, 129, .15);
+    }
+
+    .fi-name {
+      font-family: var(--fh);
+      font-size: .88rem;
+      font-weight: 700;
+    }
+
+    .fi-sub {
+      font-size: .67rem;
+      color: var(--muted);
+    }
+
+    .fi-stat {
+      font-size: .82rem;
+      color: var(--muted2);
+      line-height: 1.6;
+    }
+
+    .fi-stat strong {
+      color: var(--text);
+    }
+
+    /* ── METRICS ── */
+    .met-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    @media(max-width:600px) {
+      .met-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .met {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 22px;
+      text-align: center;
+    }
+
+    .met-lbl {
+      font-size: .65rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .met-v {
+      font-family: var(--fh);
+      font-size: 2.1rem;
+      font-weight: 900;
+    }
+
+    .met-desc {
+      font-size: .68rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── LLM ── */
+    .llm-card {
+      background: var(--s2);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border2);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+      border-radius: 16px;
+      padding: 26px 28px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .llm-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--orange), var(--yellow), var(--green));
+    }
+
+    .llm-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .llm-ico {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(249, 115, 22, .12);
+      border: 1px solid rgba(249, 115, 22, .2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .llm-ttl {
+      font-family: var(--fh);
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .llm-sub {
+      font-size: .7rem;
+      color: var(--muted);
+    }
+
+    .llm-body {
+      color: #94a3b8;
+      font-size: .87rem;
+      line-height: 1.85;
+      white-space: pre-wrap;
+    }
+
+    /* ── PRODUCTS BREAKDOWN ── */
+    .prod-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .prod-card {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .prod-name {
+      font-family: var(--fh);
+      font-weight: 800;
+      font-size: .95rem;
+      margin-bottom: 12px;
+    }
+
+    .prod-metrics {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .pm {
+      font-size: .75rem;
+    }
+
+    .pm span {
+      display: block;
+      font-size: .62rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .top-feat {
+      font-size: .72rem;
+      color: var(--muted2);
+    }
+
+    .feat-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 5px;
+    }
+
+    .feat-bar-inner {
+      height: 4px;
+      border-radius: 2px;
+      background: var(--blue);
+    }
+
+    .feat-label {
+      font-size: .68rem;
+      color: var(--muted2);
+      white-space: nowrap;
+    }
+
+    /* ── TABLE ── */
+    .tbl-card {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .tbl-head-row {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--fh);
+      font-size: .95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tbl-scroll {
+      overflow-x: auto;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      background: var(--s1);
+    }
+
+    th {
+      padding: 11px 18px;
+      text-align: left;
+      font-size: .63rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+
+    td {
+      padding: 9px 18px;
+      font-size: .82rem;
+      border-bottom: 1px solid rgba(23, 32, 53, .6);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(59, 130, 246, .04);
+    }
+
+    .badge-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: .67rem;
+      font-weight: 600;
+    }
+
+    .b-green {
+      background: rgba(16, 185, 129, .15);
+      color: var(--green);
+    }
+
+    .b-orange {
+      background: rgba(249, 115, 22, .15);
+      color: var(--orange);
+    }
+
+    .b-blue {
+      background: rgba(59, 130, 246, .15);
+      color: var(--blue);
+    }
+
+    .b-cyan {
+      background: rgba(6, 182, 212, .15);
+      color: var(--cyan);
+    }
+
+    .b-gray {
+      background: rgba(74, 96, 128, .15);
+      color: var(--muted2);
+    }
+
+    /* ── KAGGLE BOX ── */
+    .kaggle-box {
+      background: linear-gradient(135deg, rgba(32, 171, 93, .08), rgba(59, 130, 246, .08));
+      border: 1px solid rgba(32, 171, 93, .2);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 28px;
+    }
+
+    .kaggle-title {
+      font-family: var(--fh);
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dataset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .ds-card {
+      background: rgba(0, 0, 0, .3);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .ds-name {
+      font-family: var(--fh);
+      font-weight: 700;
+      font-size: .88rem;
+      margin-bottom: 6px;
+    }
+
+    .ds-info {
+      font-size: .72rem;
+      color: var(--muted2);
+      line-height: 1.6;
+    }
+
+    .ds-link {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: .72rem;
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .ds-link:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 22px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: .72rem;
+      letter-spacing: .05em;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--s1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px;
+    }
+
+    /* ── ROI CALCULATOR ── */
+    .roi-section {
+      display: none;
+    }
+
+    .roi-section.active {
+      display: block;
+      animation: rise .35s ease;
+    }
+
+    .page-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+
+    .tab-btn {
+      padding: 10px 22px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted2);
+      font-family: var(--fh);
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      color: var(--text);
+      border-bottom-color: var(--blue);
+    }
+
+    .forecast-section {
+      display: block;
+    }
+
+    .forecast-section.hidden {
+      display: none;
+    }
+
+    .roi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      margin-bottom: 28px;
+    }
+
+    @media(max-width:800px) {
+      .roi-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .roi-slider-card {
+      background: var(--s2);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 26px;
+    }
+
+    .roi-results-card {
+      background: var(--s2);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 26px;
+    }
+
+    .roi-slider-title {
+      font-family: var(--fh);
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .roi-field {
+      margin-bottom: 20px;
+    }
+
+    .roi-field-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .roi-field-lbl {
+      font-size: .8rem;
+      color: var(--muted2);
+    }
+
+    .roi-field-val {
+      font-family: var(--fh);
+      font-size: .95rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .roi-range {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border2);
+      outline: none;
+    }
+
+    .roi-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--blue);
+      cursor: pointer;
+      border: 2px solid var(--s2);
+      transition: transform .15s;
+    }
+
+    .roi-range::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .roi-total {
+      background: linear-gradient(135deg, rgba(59, 130, 246, .12), rgba(16, 185, 129, .08));
+      border: 1px solid rgba(59, 130, 246, .25);
+      border-radius: 14px;
+      padding: 22px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .roi-total-lbl {
+      font-size: .7rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .roi-total-val {
+      font-family: var(--fh);
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    .roi-total-sub {
+      font-size: .75rem;
+      color: var(--muted2);
+      margin-top: 6px;
+    }
+
+    .roi-kpi-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .roi-kpi {
+      background: var(--s1);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .roi-kpi-lbl {
+      font-size: .63rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .roi-kpi-val {
+      font-family: var(--fh);
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    .breakdown-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bk-item {
+      background: var(--s1);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .bk-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .bk-name {
+      font-size: .82rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .bk-amt {
+      font-family: var(--fh);
+      font-size: .9rem;
+      font-weight: 800;
+    }
+
+    .bk-bar-track {
+      height: 5px;
+      background: var(--border2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .bk-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .5s ease;
+    }
+
+    .bk-desc {
+      font-size: .7rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── ROI CALCULATOR ── */
+    .roi-section-wrap {
+      background: var(--s2);
+      border: 1px solid var(--border2);
+      border-radius: 18px;
+      padding: 32px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .roi-section-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--yellow), var(--orange), var(--green));
+    }
+
+    .roi-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .roi-header-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(234, 179, 8, .12);
+      border: 1px solid rgba(234, 179, 8, .25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    .roi-header-title {
+      font-family: var(--fh);
+      font-size: 1.15rem;
+      font-weight: 900;
+    }
+
+    .roi-header-sub {
+      font-size: .72rem;
+      color: var(--muted);
+    }
+
+    .roi-body-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media(max-width:800px) {
+      .roi-body-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .roi-sliders-col {}
+
+    .roi-results-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .roi-field {
+      margin-bottom: 18px;
+    }
+
+    .roi-field-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+
+    .roi-field-lbl {
+      font-size: .8rem;
+      color: var(--muted2);
+    }
+
+    .roi-field-val {
+      font-family: var(--fh);
+      font-size: .9rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .roi-range {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border2);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .roi-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--yellow);
+      cursor: pointer;
+      border: 2px solid var(--s2);
+      transition: transform .15s;
+    }
+
+    .roi-range::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+
+    .roi-total-box {
+      background: rgba(16, 185, 129, .08);
+      border: 1px solid rgba(16, 185, 129, .2);
+      border-radius: 14px;
+      padding: 22px;
+      text-align: center;
+    }
+
+    .roi-total-lbl {
+      font-size: .65rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .roi-total-val {
+      font-family: var(--fh);
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    .roi-total-sub {
+      font-size: .73rem;
+      color: var(--muted2);
+      margin-top: 6px;
+    }
+
+    .roi-kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .roi-kpi {
+      background: var(--s1);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .roi-kpi-lbl {
+      font-size: .62rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .roi-kpi-val {
+      font-family: var(--fh);
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .roi-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .roi-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .roi-bar-lbl {
+      font-size: .72rem;
+      color: var(--muted2);
+      min-width: 160px;
+    }
+
+    .roi-bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .roi-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .5s ease;
+    }
+
+    .roi-bar-amt {
+      font-size: .72rem;
+      font-weight: 600;
+      min-width: 72px;
+      text-align: right;
+    }
+
+    .roi-payback-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .roi-pb-item {
+      background: var(--s1);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .roi-pb-lbl {
+      font-size: .62rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .roi-pb-val {
+      font-family: var(--fh);
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <!-- NAV -->
+    <nav>
+      <div class="nav-logo">Sales Intelligence</div>
+      <div class="nav-pills">
+        <span class="pill pill-orange">🎉 Events</span>
+        <span class="pill pill-blue">🌧 Weather</span>
+        <span class="pill pill-purple">📈 Demand</span>
+        <span class="pill pill-green">⚔️ Cannibalization</span>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <h1>Advanced Retail<br /><span class="hl">Sales Intelligence</span></h1>
+      <p class="hero-sub">XGBoost forecasting enhanced with 4 real-world factors: holidays, weather, demand signals, and
+        competitor dynamics. Built for Indian hypermarkets.</p>
+
+    </section>
+
+
+
+    <!-- CONTROL PANEL -->
+    <div class="ctrl-panel">
+      <div class="ctrl-title">⚙ Configure Forecast</div>
+      <div class="ctrl-grid">
+        <div class="fld">
+          <label>History Start</label>
+          <input type="date" id="startDate" />
+        </div>
+        <div class="fld">
+          <label>History End</label>
+          <input type="date" id="endDate" />
+        </div>
+        <div class="fld">
+          <label>Forecast Horizon</label>
+          <select id="horizon">
+            <option value="7">7 days</option>
+            <option value="14">14 days</option>
+            <option value="30" selected>30 days</option>
+            <option value="60">60 days</option>
+            <option value="90">90 days</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label>Product Categories</label>
+          <select id="nProds">
+            <option value="1">1 — Groceries only</option>
+            <option value="2">2 — Groceries + Electronics</option>
+            <option value="3" selected>3 — All Categories</option>
+          </select>
+        </div>
+        <button class="go-btn" id="goBtn" onclick="run()">
+          <span>▶</span> Run Forecast
+        </button>
+      </div>
+    </div>
+
+    <div class="err" id="err"></div>
+
+    <!-- LOADING -->
+    <div class="loading" id="loading">
+      <div class="lds"></div>
+      <p>Training XGBoost models with 4 advanced factors…</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot blue"></div>Holiday & Event Features
+        </div>
+        <div class="step">
+          <div class="step-dot green"></div>Weather Integration
+        </div>
+        <div class="step">
+          <div class="step-dot orange"></div>Demand Sensing
+        </div>
+        <div class="step">
+          <div class="step-dot purple"></div>Cannibalization Model
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results">
+
+      <!-- STAT CARDS -->
+      <div class="sec-title">📊 Forecast Overview</div>
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="stat-lbl">Forecast Total</div>
+          <div class="stat-val c-blue" id="sFcTotal">—</div>
+          <div class="stat-hint">projected revenue</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Avg / Day</div>
+          <div class="stat-val c-green" id="sFcAvg">—</div>
+          <div class="stat-hint">forecast period</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Historical Avg</div>
+          <div class="stat-val c-cyan" id="sHistAvg">—</div>
+          <div class="stat-hint">daily average</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Holiday Days</div>
+          <div class="stat-val c-orange" id="sHolidays">—</div>
+          <div class="stat-hint">in forecast window</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Rainy Days</div>
+          <div class="stat-val c-blue" id="sRainy">—</div>
+          <div class="stat-hint">foot traffic risk</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Payday Days</div>
+          <div class="stat-val c-yellow" id="sPayday">—</div>
+          <div class="stat-hint">salary cycle boost</div>
+        </div>
+      </div>
+
+      <!-- MAIN CHART -->
+      <div class="cc">
+        <div class="cc-head">
+          <div class="cc-title"><span class="cc-dot" style="background:var(--blue)"></span>Total Sales — History +
+            Forecast</div>
+          <div class="cc-sub">All product categories combined</div>
+        </div>
+        <div class="chart-h tall"><canvas id="mainChart"></canvas></div>
+      </div>
+
+      <!-- FACTOR INSIGHTS -->
+      <div class="sec-title">🔬 Advanced Factor Insights</div>
+      <div class="factor-grid">
+        <div class="fi-card">
+          <div class="fi-header">
+            <div class="fi-icon ev">🎉</div>
+            <div>
+              <div class="fi-name">External Events</div>
+              <div class="fi-sub">Holidays & Payday cycles</div>
+            </div>
+          </div>
+          <div class="fi-stat" id="fiEvents">—</div>
+        </div>
+        <div class="fi-card">
+          <div class="fi-header">
+            <div class="fi-icon wx">🌧</div>
+            <div>
+              <div class="fi-name">Weather Impact</div>
+              <div class="fi-sub">Mumbai monsoon & temperature</div>
+            </div>
+          </div>
+          <div class="fi-stat" id="fiWeather">—</div>
+        </div>
+        <div class="fi-card">
+          <div class="fi-header">
+            <div class="fi-icon ds">📊</div>
+            <div>
+              <div class="fi-name">Demand Sensing</div>
+              <div class="fi-sub">Google Trends proxy + web traffic</div>
+            </div>
+          </div>
+          <div class="fi-stat" id="fiDemand">—</div>
+        </div>
+        <div class="fi-card">
+          <div class="fi-header">
+            <div class="fi-icon cn">⚔️</div>
+            <div>
+              <div class="fi-name">Cannibalization</div>
+              <div class="fi-sub">Own promos vs competitor</div>
+            </div>
+          </div>
+          <div class="fi-stat" id="fiCannib">—</div>
+        </div>
+      </div>
+
+      <!-- PER-PRODUCT BREAKDOWN -->
+      <div class="sec-title">🛒 Per-Product Forecast</div>
+      <div class="cc">
+        <div class="cc-head">
+          <div class="cc-title"><span class="cc-dot" style="background:var(--green)"></span>Product-Level Forecast
+            Breakdown</div>
+        </div>
+        <div class="chart-h"><canvas id="prodChart"></canvas></div>
+      </div>
+      <div class="prod-grid" id="prodCards"></div>
+
+      <!-- ML METRICS -->
+      <div class="sec-title">🎯 Model Accuracy</div>
+      <div class="met-row">
+        <div class="met">
+          <div class="met-lbl">Best MAPE</div>
+          <div class="met-v c-green" id="mBestMape">—</div>
+          <div class="met-desc">lowest error rate</div>
+        </div>
+        <div class="met">
+          <div class="met-lbl">Avg MAPE</div>
+          <div class="met-v c-yellow" id="mAvgMape">—</div>
+          <div class="met-desc">across all products</div>
+        </div>
+        <div class="met">
+          <div class="met-lbl">Best MAE</div>
+          <div class="met-v c-blue" id="mBestMae">—</div>
+          <div class="met-desc">mean absolute error</div>
+        </div>
+      </div>
+
+      <!-- LLM ANALYSIS -->
+      <div class="llm-card">
+        <div class="llm-head">
+          <div class="llm-ico">🤖</div>
+          <div>
+            <div class="llm-ttl">AI Analysis — Llama 3 (Groq)</div>
+            <div class="llm-sub">Sales-specific retail intelligence powered by advanced factor data</div>
+          </div>
+        </div>
+        <div class="llm-body" id="llmBody">Awaiting forecast…</div>
+      </div>
+
+      <!-- FORECAST TABLE -->
+      <div class="tbl-card">
+        <div class="tbl-head-row">📅 Day-by-Day Forecast with Context</div>
+        <div class="tbl-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Total Forecast</th>
+                <th>vs Avg</th>
+                <th>Holiday</th>
+                <th>Payday</th>
+                <th>Rain</th>
+              </tr>
+            </thead>
+            <tbody id="fcTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /results -->
+
+    <!-- ROI CALCULATOR -->
+    <div class="roi-section-wrap" id="roiSection">
+      <div class="roi-header">
+        <div class="roi-header-icon">💰</div>
+        <div>
+          <div class="roi-header-title">ROI Calculator</div>
+          <div class="roi-header-sub">Estimate how much forecasting saves your store chain — drag sliders to match your
+            profile</div>
+        </div>
+      </div>
+      <div class="roi-body-grid">
+        <div class="roi-sliders-col">
+          <div class="roi-field">
+            <div class="roi-field-top"><span class="roi-field-lbl">Annual revenue per store</span><span
+                class="roi-field-val" id="rv-out">₹100 Cr</span></div>
+            <input class="roi-range" type="range" id="rv" min="10" max="500" step="5" value="100" oninput="roiCalc()" />
+          </div>
+          <div class="roi-field">
+            <div class="roi-field-top"><span class="roi-field-lbl">Number of stores</span><span class="roi-field-val"
+                id="st-out">5</span></div>
+            <input class="roi-range" type="range" id="st" min="1" max="50" step="1" value="5" oninput="roiCalc()" />
+          </div>
+          <div class="roi-field">
+            <div class="roi-field-top"><span class="roi-field-lbl">Perishable goods % of revenue</span><span
+                class="roi-field-val" id="pe-out">40%</span></div>
+            <input class="roi-range" type="range" id="pe" min="10" max="70" step="5" value="40" oninput="roiCalc()" />
+          </div>
+          <div class="roi-field">
+            <div class="roi-field-top"><span class="roi-field-lbl">Current waste / overstock rate</span><span
+                class="roi-field-val" id="wa-out">8%</span></div>
+            <input class="roi-range" type="range" id="wa" min="2" max="20" step="1" value="8" oninput="roiCalc()" />
+          </div>
+          <div class="roi-field">
+            <div class="roi-field-top"><span class="roi-field-lbl">Staff cost per store (₹ lakh/yr)</span><span
+                class="roi-field-val" id="sc-out">₹150 L</span></div>
+            <input class="roi-range" type="range" id="sc" min="50" max="500" step="10" value="150"
+              oninput="roiCalc()" />
+          </div>
+          <div class="roi-field">
+            <div class="roi-field-top"><span class="roi-field-lbl">Annual promotion budget (₹ lakh)</span><span
+                class="roi-field-val" id="pb-out">₹40 L</span></div>
+            <input class="roi-range" type="range" id="pb" min="10" max="200" step="5" value="40" oninput="roiCalc()" />
+          </div>
+          <div class="sec-title" style="margin-top:8px">Savings by factor</div>
+          <div class="roi-bars" id="roiBars"></div>
+        </div>
+        <div class="roi-results-col">
+          <div class="roi-total-box">
+            <div class="roi-total-lbl">Total annual savings</div>
+            <div class="roi-total-val" id="roi-total">—</div>
+            <div class="roi-total-sub" id="roi-total-sub">across all stores</div>
+          </div>
+          <div class="roi-kpi-grid">
+            <div class="roi-kpi">
+              <div class="roi-kpi-lbl">Per store / year</div>
+              <div class="roi-kpi-val c-green" id="roi-perstore">—</div>
+            </div>
+            <div class="roi-kpi">
+              <div class="roi-kpi-lbl">ROI on system</div>
+              <div class="roi-kpi-val c-yellow" id="roi-pct">—</div>
+            </div>
+            <div class="roi-kpi">
+              <div class="roi-kpi-lbl">Waste saved</div>
+              <div class="roi-kpi-val c-orange" id="roi-waste">—</div>
+            </div>
+            <div class="roi-kpi">
+              <div class="roi-kpi-lbl">Staff savings</div>
+              <div class="roi-kpi-val c-blue" id="roi-staff">—</div>
+            </div>
+          </div>
+          <div class="sec-title">Payback &amp; long-term</div>
+          <div class="roi-payback-row">
+            <div class="roi-pb-item">
+              <div class="roi-pb-lbl">System cost</div>
+              <div class="roi-pb-val" id="roi-syscost">—</div>
+            </div>
+            <div class="roi-pb-item">
+              <div class="roi-pb-lbl">Break-even</div>
+              <div class="roi-pb-val c-cyan" id="roi-breakeven">—</div>
+            </div>
+            <div class="roi-pb-item">
+              <div class="roi-pb-lbl">5-year benefit</div>
+              <div class="roi-pb-val c-green" id="roi-5yr">—</div>
+            </div>
+          </div>
+          <div
+            style="background:var(--s1);border-radius:10px;padding:14px 16px;font-size:.75rem;color:var(--muted2);line-height:1.8;">
+            <strong style="color:var(--text);display:block;margin-bottom:6px">How savings are calculated</strong>
+            📦 <strong style="color:var(--text)">Inventory</strong> — 55% of perishable waste eliminated via demand
+            signals<br />
+            👷 <strong style="color:var(--text)">Staffing</strong> — 12% of labour cost via smarter scheduling<br />
+            🎯 <strong style="color:var(--text)">Promos</strong> — 28% better return by timing to demand peaks<br />
+            🛒 <strong style="color:var(--text)">Stockouts</strong> — 1.8% revenue recovered (no empty shelves on
+            Diwali)<br />
+            🤝 <strong style="color:var(--text)">Supply chain</strong> — 0.8% savings via advance volume commitments
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>Sales Intelligence · XGBoost ML + 4 Advanced Factors + Groq Llama 3 · Made for Indian Retail</footer>
+  </div><!-- /wrap -->
+
+  <script>
+    // Default dates
+    const today = new Date();
+    const ago = new Date(today); ago.setFullYear(today.getFullYear() - 1);
+    document.getElementById("startDate").value = ago.toISOString().split("T")[0];
+    document.getElementById("endDate").value = today.toISOString().split("T")[0];
+
+    const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const COLORS = ["#3b82f6", "#10b981", "#f97316", "#8b5cf6"];
+    let charts = {};
+
+    const fmt = v => "₹" + Number(v).toLocaleString("en-IN", { maximumFractionDigits: 0 });
+    const pct = (v, avg) => (((v - avg) / avg) * 100).toFixed(1);
+
+    async function run() {
+      const start = document.getElementById("startDate").value;
+      const end = document.getElementById("endDate").value;
+      const hz = document.getElementById("horizon").value;
+      const np = document.getElementById("nProds").value;
+      const btn = document.getElementById("goBtn");
+      const errEl = document.getElementById("err");
+
+
+      if (!start || !end) { showErr("Select both dates."); return; }
+      if (new Date(end) <= new Date(start)) { showErr("End must be after start."); return; }
+
+      errEl.className = "err";
+      document.getElementById("results").className = "";
+      document.getElementById("loading").className = "loading on";
+      btn.disabled = true;
+
+      try {
+        const apiUrl = window.location.protocol === 'file:' ? 'http://127.0.0.1:5001/api/forecast' : '/api/forecast';
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ start_date: start, end_date: end, horizon: hz, n_products: np })
+        });
+        const data = await res.json();
+        if (!res.ok) { showErr(data.error || "Forecast failed."); return; }
+        render(data);
+      } catch (e) {
+        showErr("Javascript Error: " + e.message);
+        console.error(e);
+      } finally {
+        document.getElementById("loading").className = "loading";
+        btn.disabled = false;
+      }
+    }
+
+    function showErr(msg) {
+      const el = document.getElementById("err");
+      el.textContent = "⚠ " + msg; el.className = "err on";
+      document.getElementById("loading").className = "loading";
+      document.getElementById("goBtn").disabled = false;
+    }
+
+    function render(data) {
+      const { history, forecast, per_product_forecast, metrics, products, summary, llm_analysis } = data;
+
+      // Stats
+      document.getElementById("sFcTotal").textContent = fmt(summary.fc_total);
+      document.getElementById("sFcAvg").textContent = fmt(summary.fc_avg);
+      document.getElementById("sHistAvg").textContent = fmt(summary.hist_mean);
+      document.getElementById("sHolidays").textContent = summary.holiday_days;
+      document.getElementById("sRainy").textContent = summary.rainy_days;
+      document.getElementById("sPayday").textContent = summary.payday_days;
+
+      // Factor insights
+      document.getElementById("fiEvents").innerHTML =
+        `<strong>${summary.holiday_days}</strong> holiday days & <strong>${summary.payday_days}</strong> payday days in the forecast window.<br/>The model learned that festivals like Diwali & Dussehra cause <strong>+35–65%</strong> sales spikes. Payday cycles (1st & last 2 days of month) add ~<strong>+12%</strong>.`;
+      document.getElementById("fiWeather").innerHTML =
+        `<strong>${summary.rainy_days}</strong> rainy days forecast (Mumbai monsoon pattern).<br/>Rainfall reduces foot traffic by ~<strong>15–30%</strong> depending on category. Electronics most affected (<strong>−25%</strong>), Groceries least (<strong>−15%</strong>).`;
+      document.getElementById("fiDemand").innerHTML =
+        `Demand index peaks <strong>7 days before</strong> major holidays, with search interest rising <strong>+32 points</strong> above baseline.<br/>Web traffic lag feature (2-day delay) captures purchase intent before it hits the register.`;
+      document.getElementById("fiCannib").innerHTML =
+        `Own promotions inject <strong>+18–35%</strong> daily revenue boost.<br/>Competitor promos create a <strong>−8–18%</strong> drag. XGBoost learns these cross-product relationships automatically from the <code>competitor_promo</code> and <code>own_promo</code> columns.`;
+
+      // Charts
+      buildMainChart(history, forecast);
+      buildProdChart(per_product_forecast, products, parseInt(document.getElementById("horizon").value));
+
+      // Product cards
+      buildProdCards(metrics, products, COLORS);
+
+      // ML metrics
+      const mapes = products.map(p => metrics[p].MAPE);
+      const maes = products.map(p => metrics[p].MAE);
+      document.getElementById("mBestMape").textContent = Math.min(...mapes).toFixed(1) + "%";
+      document.getElementById("mAvgMape").textContent = (mapes.reduce((a, b) => a + b, 0) / mapes.length).toFixed(1) + "%";
+      document.getElementById("mBestMae").textContent = fmt(Math.min(...maes));
+
+      // LLM
+      document.getElementById("llmBody").textContent = llm_analysis;
+
+      // Table
+      buildTable(forecast, summary.fc_avg, per_product_forecast);
+
+      document.getElementById("results").className = "on";
+      document.getElementById("results").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function cBase() {
+      return {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { labels: { color: "#4a6080", font: { family: "'JetBrains Mono'", size: 11 }, boxWidth: 10, padding: 16 } },
+          tooltip: {
+            backgroundColor: "#090e1a", borderColor: "#172035", borderWidth: 1,
+            titleColor: "#e2e8f0", bodyColor: "#7a95b0", padding: 12,
+            callbacks: { label: ctx => " " + ctx.dataset.label + ": ₹" + Number(ctx.raw || 0).toLocaleString("en-IN") }
+          }
+        },
+        scales: {
+          x: { ticks: { color: "#4a6080", font: { family: "'JetBrains Mono'", size: 10 }, maxTicksLimit: 14 }, grid: { color: "rgba(23,32,53,.6)" } },
+          y: { ticks: { color: "#4a6080", font: { family: "'JetBrains Mono'", size: 10 }, callback: v => "₹" + Number(v).toLocaleString("en-IN") }, grid: { color: "rgba(23,32,53,.6)" } }
+        }
+      };
+    }
+
+    function buildMainChart(history, forecast) {
+      if (charts.main) charts.main.destroy();
+      const step = Math.max(1, Math.floor(history.length / 200));
+      const hs = history.filter((_, i) => i % step === 0);
+      const ctx = document.getElementById("mainChart").getContext("2d");
+
+      const hg = ctx.createLinearGradient(0, 0, 0, 340);
+      hg.addColorStop(0, "rgba(59,130,246,.2)"); hg.addColorStop(1, "rgba(59,130,246,0)");
+      const fg = ctx.createLinearGradient(0, 0, 0, 340);
+      fg.addColorStop(0, "rgba(16,185,129,.25)"); fg.addColorStop(1, "rgba(16,185,129,0)");
+
+      charts.main = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: [...hs.map(r => r.date), ...forecast.map(r => r.date)],
+          datasets: [
+            {
+              label: "Historical", data: [...hs.map(r => r.total_sales), ...Array(forecast.length).fill(null)],
+              borderColor: "#3b82f6", borderWidth: 1.5, backgroundColor: hg, fill: true, pointRadius: 0, tension: .35
+            },
+            {
+              label: "Forecast", data: [...Array(hs.length).fill(null), ...forecast.map(r => r.total_forecast)],
+              borderColor: "#10b981", borderWidth: 2.5, backgroundColor: fg, fill: true,
+              pointRadius: 4, pointBackgroundColor: "#10b981", borderDash: [6, 3], tension: .35
+            }
+          ]
+        },
+        options: { ...cBase(), animation: { duration: 700 } }
+      });
+    }
+
+    function buildProdChart(ppf, products, horizon) {
+      if (charts.prod) charts.prod.destroy();
+      const ctx = document.getElementById("prodChart").getContext("2d");
+
+      // Get last `horizon` forecast dates per product
+      const fcByProd = {};
+      products.forEach(p => {
+        fcByProd[p] = ppf.filter(r => r.product === p).slice(-horizon);
+      });
+      const labels = (fcByProd[products[0]] || []).map(r => r.date);
+
+      charts.prod = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: products.map((p, i) => ({
+            label: p,
+            data: (fcByProd[p] || []).map(r => r.forecast),
+            backgroundColor: COLORS[i] + "cc",
+            borderColor: COLORS[i], borderWidth: 1, borderRadius: 3
+          }))
+        },
+        options: { ...cBase(), scales: { ...cBase().scales, x: { ...cBase().scales.x, stacked: true }, y: { ...cBase().scales.y, stacked: true } }, animation: { duration: 500 } }
+      });
+    }
+
+    function buildProdCards(metrics, products, colors) {
+      const cont = document.getElementById("prodCards");
+      cont.innerHTML = "";
+      products.forEach((p, i) => {
+        const m = metrics[p];
+        const tf = m.top_features || [];
+        const maxImp = tf[0]?.importance || 1;
+        const featHTML = tf.slice(0, 3).map(f => `
+      <div class="feat-bar">
+        <div class="feat-bar-inner" style="width:${Math.round((f.importance / maxImp) * 100)}%;background:${colors[i]}"></div>
+        <span class="feat-label">${f.name}</span>
+      </div>`).join("");
+        cont.innerHTML += `
+      <div class="prod-card">
+        <div class="prod-name" style="color:${colors[i]}">${p}</div>
+        <div class="prod-metrics">
+          <div class="pm"><span>MAE</span>${fmt(m.MAE)}</div>
+          <div class="pm"><span>RMSE</span>${fmt(m.RMSE)}</div>
+          <div class="pm"><span>MAPE</span>${m.MAPE}%</div>
+        </div>
+        <div class="top-feat">Top features driving predictions:</div>
+        ${featHTML}
+      </div>`;
+      });
+    }
+
+    function buildTable(forecast, avg, ppf) {
+      const tbody = document.getElementById("fcTable");
+      tbody.innerHTML = "";
+
+      // Build a lookup for per-product context
+      const ctxMap = {};
+      ppf.forEach(r => {
+        if (!ctxMap[r.date]) ctxMap[r.date] = {};
+        ctxMap[r.date][r.product] = r;
+      });
+
+      forecast.forEach((r, i) => {
+        const d = new Date(r.date + "T00:00:00");
+        const diff = pct(r.total_forecast, avg);
+        const isUp = parseFloat(diff) >= 0;
+        const ctx = ctxMap[r.date] || {};
+        const isHol = Object.values(ctx).some(v => v.is_holiday);
+        const isPay = Object.values(ctx).some(v => v.is_payday);
+        const isRain = Object.values(ctx).some(v => v.is_raining);
+
+        tbody.innerHTML += `
+      <tr>
+        <td style="color:var(--muted)">${i + 1}</td>
+        <td>${r.date}</td>
+        <td style="color:var(--muted2)">${DAYS[d.getDay()]}</td>
+        <td style="color:var(--green);font-weight:600">${fmt(r.total_forecast)}</td>
+        <td><span class="badge-sm ${isUp ? 'b-green' : 'b-orange'}">${isUp ? '↑' : '↓'}${Math.abs(diff)}%</span></td>
+        <td>${isHol ? '<span class="badge-sm b-orange">🎉 Yes</span>' : '<span class="badge-sm b-gray">—</span>'}</td>
+        <td>${isPay ? '<span class="badge-sm b-yellow">💰 Yes</span>' : '<span class="badge-sm b-gray">—</span>'}</td>
+        <td>${isRain ? '<span class="badge-sm b-blue">🌧 Yes</span>' : '<span class="badge-sm b-gray">—</span>'}</td>
+      </tr>`;
+      });
+    }
+
+    document.addEventListener("keydown", e => { if (e.key === "Enter") run(); });
+    // ── ROI CALCULATOR ──────────────────────────────────────
+    function roiFmt(n) {
+      n = Math.round(n);
+      if (n >= 10000000) return "₹" + (n / 10000000).toFixed(1) + " Cr";
+      if (n >= 100000) return "₹" + (n / 100000).toFixed(1) + " L";
+      if (n >= 1000) return "₹" + (n / 1000).toFixed(0) + "K";
+      return "₹" + n;
+    }
+
+    function roiCalc() {
+      const rev = +document.getElementById("rv").value * 1e7;
+      const stores = +document.getElementById("st").value;
+      const perish = +document.getElementById("pe").value / 100;
+      const waste = +document.getElementById("wa").value / 100;
+      const staff = +document.getElementById("sc").value * 1e5;
+      const promo = +document.getElementById("pb").value * 1e5;
+
+      document.getElementById("rv-out").textContent = "₹" + Math.round(+document.getElementById("rv").value) + " Cr";
+      document.getElementById("st-out").textContent = stores;
+      document.getElementById("pe-out").textContent = Math.round(+document.getElementById("pe").value) + "%";
+      document.getElementById("wa-out").textContent = Math.round(+document.getElementById("wa").value) + "%";
+      document.getElementById("sc-out").textContent = "₹" + Math.round(+document.getElementById("sc").value) + " L";
+      document.getElementById("pb-out").textContent = "₹" + Math.round(+document.getElementById("pb").value) + " L";
+
+      const totalRev = rev * stores;
+      const s_waste = totalRev * perish * waste * 0.55;
+      const s_staff = staff * stores * 0.12;
+      const s_promo = promo * stores * 0.28;
+      const s_stockout = totalRev * 0.018;
+      const s_supply = totalRev * 0.008;
+      const total = s_waste + s_staff + s_promo + s_stockout + s_supply;
+      const sysCost = stores * 500000 + 200000;
+      const roi = Math.round((total / sysCost) * 100);
+      const paybackMo = Math.max(1, Math.round((sysCost / total) * 12));
+      const fiveYear = total * 5 - sysCost;
+
+      document.getElementById("roi-total").textContent = roiFmt(total);
+      document.getElementById("roi-total-sub").textContent = "across " + stores + " store" + (stores > 1 ? "s" : "");
+      document.getElementById("roi-perstore").textContent = roiFmt(total / stores);
+      document.getElementById("roi-pct").textContent = roi + "%";
+      document.getElementById("roi-waste").textContent = roiFmt(s_waste);
+      document.getElementById("roi-staff").textContent = roiFmt(s_staff);
+      document.getElementById("roi-syscost").textContent = roiFmt(sysCost);
+      document.getElementById("roi-breakeven").textContent = paybackMo < 12 ? paybackMo + " mo" : (paybackMo / 12).toFixed(1) + " yr";
+      document.getElementById("roi-5yr").textContent = roiFmt(fiveYear);
+
+      const factors = [
+        { label: "📦 Inventory & waste", val: s_waste, color: "#10b981" },
+        { label: "🛒 Stockout prevention", val: s_stockout, color: "#f97316" },
+        { label: "👷 Staff scheduling", val: s_staff, color: "#3b82f6" },
+        { label: "🎯 Promo efficiency", val: s_promo, color: "#eab308" },
+        { label: "🤝 Supply negotiation", val: s_supply, color: "#8b5cf6" },
+      ];
+      const maxVal = Math.max(...factors.map(f => f.val));
+      document.getElementById("roiBars").innerHTML = factors.map(f => `
+    <div class="roi-bar-row">
+      <div class="roi-bar-lbl">${f.label}</div>
+      <div class="roi-bar-track"><div class="roi-bar-fill" style="width:${Math.round((f.val / maxVal) * 100)}%;background:${f.color}"></div></div>
+      <div class="roi-bar-amt" style="color:${f.color}">${roiFmt(f.val)}</div>
+    </div>`).join("");
+    }
+
+    roiCalc();
+
+  </script>
+</body>
+
+</html>
