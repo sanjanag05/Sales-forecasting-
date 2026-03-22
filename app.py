@@ -1,5 +1,3 @@
-
-
 import os, json, warnings
 import numpy as np
 import pandas as pd
@@ -32,9 +30,6 @@ except Exception as e:
     print("Could not load data/train.csv:", e)
     ROSSMANN_DF = None
 
-# ══════════════════════════════════════════════════════════
-#  1.  DATA GENERATION  (DMart-style synthetic)
-# ══════════════════════════════════════════════════════════
 
 INDIAN_HOLIDAYS = {
     "Republic Day":        "01-26",
@@ -441,5 +436,6 @@ def forecast():
 
 if __name__ == "__main__":
     os.makedirs("static", exist_ok=True)
-    print("🚀  DMart Forecasting App → http://127.0.0.1:5001")
-    app.run(host="127.0.0.1", port=5001, debug=True)
+    port = int(os.environ.get("PORT", 5001))
+    print(f"🚀  Sales Forecasting App → http://0.0.0.0:{port}")
+    app.run(host="0.0.0.0", port=port, debug=False)
